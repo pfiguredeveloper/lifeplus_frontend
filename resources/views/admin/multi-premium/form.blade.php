@@ -230,7 +230,6 @@ $(document).on("click", ".print-report-button-model", function () {
          var reportID = $(this).data('id-report');
          var fromDate = $('.fromDate').val();
          var toDate   = $('.todate').val();
-         console.log(reportID);
          $.ajax({
             url: "{{ url('admin/servicing-reports') }}"+"/"+reportID+"/reportNews",
             type: "POST",

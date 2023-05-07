@@ -1,3 +1,21 @@
+@php($ordering_option = "")
+@if($para["sorting_option"]==0)
+    @php($ordering_option = "Name & Policy No. Wise")
+@elseif($para["sorting_option"]==1)
+    @php($ordering_option = "Area + Family Wise")
+@elseif($para["sorting_option"]==2)
+    @php($ordering_option = "Area Wise")
+@elseif($para["sorting_option"]==3)
+    @php($ordering_option = "Branch Wise")
+@elseif($para["sorting_option"]==4)
+    @php($ordering_option = "Due Date Wise")
+@elseif($para["sorting_option"]==5)
+    @php($ordering_option = "Family Wise")
+@elseif($para["sorting_option"]==6)
+    @php($ordering_option = "Policy No. Wise")
+@endif
+
+
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <title>Premium Due Report</title>
 
@@ -26,7 +44,7 @@
             <p class="header-p">{{$data['address5']}}</p>
             <hr>
         </div>
-        <p style="margin-bottom: 0px;margin-top: 0px;text-align: center;"><b>Premium Due Report upto {{ !empty($to_date) ? \Carbon\Carbon::createFromFormat('d/m/Y', $to_date)->format('F-Y') : '' }} ( Name + Policy No. Wise )</b></p>
+        <p style="margin-bottom: 0px;margin-top: 0px;text-align: center;"><b>Premium Due Report upto {{ !empty($to_date) ? \Carbon\Carbon::createFromFormat('d/m/Y', $to_date)->format('F-Y') : '' }} ( {{$ordering_option}} )</b></p>
         <span>
             <div class="pagenum-container">
                 <span style="font-size: 12px;">Print Date : <?php echo date("d/m/Y"); ?></span>
@@ -53,14 +71,14 @@
         <thead>
             <tr style="border-bottom: none;padding-top: 0px;padding-bottom: 0px;">
                 <th style="border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;">Sr.</th>
-                <th style="border-bottom: none;width:30%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">Name</th>
+                <th style="border-bottom: none;width:28%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">Name</th>
                 <th style="border-bottom: none;width:12%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">Policy No.</th>
                 <th style="border-bottom: none;width:12%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">Risk Date</th>
                 <th style="border-bottom: none;width:8%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">P - T</th>
-                <th style="border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">MD</th>
+                <th style="border-bottom: none;width:4%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">MD</th>
                 <th style="border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;text-align: right;">Premium</th>
                 <th style="border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;">Dues</th>
-                <th style="border-bottom: none;width:8%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;">ID</th>
+                <th style="border-bottom: none;width:11%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;">Mobile</th>
             </tr>
         </thead>
         <tbody style="border-left: none;border-right: none;border-bottom: none;">
@@ -89,25 +107,25 @@
                 ?>
                 <tr style="border-left: none;border-right: none;border-bottom: none;padding-top: 0px;padding-bottom: 0px;">
                     <td style="border-left: none;border-right: none;border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;"><?php echo $i; ?></td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:30%;padding-top: 0px;padding-bottom: 0px;">{{ (!empty($value['Party']) && !empty($value['Party']->NAME)) ? $value['Party']->NAME : '' }}</td>
+                    <td style="border-left: none;border-right: none;border-bottom: none;width:28%;padding-top: 0px;padding-bottom: 0px;">{{ (!empty($value['Party']) && !empty($value['Party']->NAME)) ? $value['Party']->NAME : '' }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:12%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['PONO']) ? $value['PONO'] : 0 }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:11%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['RDT']) ? \Carbon\Carbon::createFromFormat('Y-m-d', $value['RDT'])->format('d/m/Y') : '' }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;">{{ $planPTMT }}</td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;">{{ $mode }}</td>
+                    <td style="border-left: none;border-right: none;border-bottom: none;width:4%;padding-top: 0px;padding-bottom: 0px;">{{ $mode }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;text-align: right;">{{ !empty($value['PREM']) ? $value['PREM']+0 : 0 }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['FUPDATE']) ? \Carbon\Carbon::createFromFormat('Y-m-d', $value['FUPDATE'])->format('d/m/Y') : '' }}</td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:8%;padding-top: 0px;padding-bottom: 0px;"></td>
+                    <td style="border-left: none;border-right: none;border-bottom: none;width:11%;padding-top: 0px;padding-bottom: 0px;">{{@$value["Party"]->MOBILE}}</td>
                 </tr>
                 <tr style="border-left: none;border-right: none;border-top: none;padding-top: 0px;padding-bottom: 0px;">
                     <td style="border-left: none;border-right: none;border-top: none;width:5%;padding-top: 0px;padding-bottom: 0px;"></td>
-                    <td style="border-left: none;border-right: none;border-top: none;width:30%;padding-top: 0px;padding-bottom: 0px;"></td>
+                    <td style="border-left: none;border-right: none;border-top: none;width:28%;padding-top: 0px;padding-bottom: 0px;"></td>
                     <td style="border-left: none;border-right: none;border-top: none;width:12%;padding-top: 0px;padding-bottom: 0px;"></td>
                     <td style="border-left: none;border-right: none;border-top: none;width:11%;padding-top: 0px;padding-bottom: 0px;"></td>
                     <td style="border-left: none;border-right: none;border-top: none;width:10%;padding-top: 0px;padding-bottom: 0px;"></td>
-                    <td style="border-left: none;border-right: none;border-top: none;width:5%;padding-top: 0px;padding-bottom: 0px;"></td>
+                    <td style="border-left: none;border-right: none;border-top: none;width:4%;padding-top: 0px;padding-bottom: 0px;"></td>
                     <td style="border-left: none;border-right: none;border-top: none;width:10%;padding-top: 0px;padding-bottom: 0px;"></td>
                     <td style="border-left: none;border-right: none;border-top: none;width:10%;padding-top: 0px;padding-bottom: 0px;"></td>
-                    <td style="border-left: none;border-right: none;border-top: none;width:8%;padding-top: 0px;padding-bottom: 0px;"></td>
+                    <td style="border-left: none;border-right: none;border-top: none;width:11%;padding-top: 0px;padding-bottom: 0px;"></td>
                 </tr>
             <?php $i++; ?>
             @endforeach

@@ -36,7 +36,7 @@
 	</div>
 @endif
 
-@if(!empty($redioOption) && count($redioOption) > 0)
+@if(!empty($redioOption) && count($redioOption) > 0 && $reports["id"]!=24)
 	<div class="form-group{{ $errors->has('redio_option') ? ' has-error' : '' }}">
 	    <label class="col-sm-4 control-label" style="font-size: 16px;">Options</label>
 	    <div class="col-sm-5">
@@ -61,7 +61,7 @@
 
 @if(!empty($filter) && count($filter) > 0)
 
-@if($reports['id'] == 12 || $reports['id'] == 13 || $reports['id'] == 14 || $reports['id'] == 15)
+@if($reports['id'] == 12 || $reports['id'] == 24 || $reports['id'] == 13 || $reports['id'] == 14 || $reports['id'] == 15)
 <div class="form-group">
     <label class="col-sm-4 control-label"></label>
     <div class="col-sm-5" style="">
@@ -245,8 +245,9 @@
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script type="text/javascript">
+	let report_id = "{{$reports["id"]}}";
 	$(document).on("click", ".submit-click", function () {
-		if ($('.report-checkbox').filter(':checked').length < 1){
+		if($('.report-checkbox').filter(':checked').length < 1 && !["12","24"].includes(report_id)) {
 	        alert("Check at least one record!");
 			return false;
 		}
@@ -446,20 +447,55 @@
 		$('#exampleFilterModalLong').modal('toggle');
 	});
 
-	$(document).on("click", ".print-report-button-model", function () {
-         var tableName = $(this).data('print-report-table');
+	$(document).on("click", ".print-report-button-model", function (e) {
+   		 var tableName = $(this).data('print-report-table');
          $('.print-report-title').html(tableName+" Report");
          $('.print-report-title').css('textTransform', 'capitalize');
          $('.print-report-title').css('font-weight', 'bold');
          var reportID = $(this).data('id-report');
          var fromDate = $('#from_date').val();
          var toDate   = $('#to_date').val();
-		 var param1	  = $("#select_area").val();
-		 var param2   = $("#select_city").val();
+		 var param1 = $("#select_area").val();
+		 var param2  = $("#select_city").val();
+		 var select_option   = $("select[name='select_option']").val();
+		 var ordering_option   = $("select[name='sorting_option']").val();
+		 var grouping_option = $("select[name='grouping_option']").val();
+		 var report_type = $("select[name='report_type']").val();
+		 var redio_option = $("input[name='redio_option[]']:checked").map(function(ele){ return this.value;}).get();
+		 var select_do = !["",undefined,null].includes($("#select_do").val()) ? $("#select_do").val().split(",") : [];
+		 var select_area = !["",undefined,null].includes($("#select_area").val()) ? $("#select_area").val().split(",") : [];
+		 var select_city = !["",undefined,null].includes($("#select_city").val()) ? $("#select_city").val().split(",") : [];
+		 var select_family_group = !["",undefined,null].includes($("#select_family_group").val()) ? $("#select_family_group").val().split(",") : [];
+		 var select_agency = !["",undefined,null].includes($("#select_agency").val()) ? $("#select_agency").val().split(",") : [];
+      	console.log("asdasd",["12","24"].includes(reportID));
+        if([12,24].includes(reportID)) {
+        	e.preventDefault();
+        	$(".submit-click").trigger("click");
+        	return false;
+        } 	
+         	
+         	console.log("asdAAAAAAsad");
+
          $.ajax({
-            url: "{{ url('admin/servicing-reports') }}"+"/"+reportID+"/reportNews",
             type: "POST",
-			data: {"_token": "{{ csrf_token() }}","from_date":fromDate,"to_date":toDate,param1:param1,param2:param2},
+            url: "{{ url('admin/servicing-reports') }}"+"/"+reportID+"/reportNews",
+			data: {
+				"_token": "{{ csrf_token() }}",
+				from_date:fromDate,
+				to_date:toDate,
+				param1:param1,
+				param2:param2,
+				select_option:select_option,
+				sorting_option:ordering_option,
+				report_type:report_type,
+				redio_option:redio_option,
+				selectDo:select_do,
+				selectArea:select_area,
+				selectCity:select_city,
+				selectFamilyGroup:select_family_group,
+				selectAgency:select_agency,
+				optionsRadios:$("input[name='optionsRadios']:checked").val(),
+			},
             success: function(data) {
             	if($.isEmptyObject(data)) {
             		alert("No Records Found");
@@ -490,7 +526,8 @@
                 } else if(reportID == 11) {
                     $('.thead-model').append('<tr><th width="13%">Praty Name</th><th width="11%">Birth Date(R)</th><th width="12%">Birth Date(A)</th><th width="12%">Wedding Date</th><th width="10%">Mobile</th><th width="8%">Select</th></tr>');
                 } else if(reportID == 12) {
-                    $('.thead-model').append('<tr><th width="13%">Praty Name</th><th width="11%">Birth Date(R)</th><th width="12%">Birth Date(A)</th><th width="12%">Wedding Date</th><th width="10%">Mobile</th><th width="8%">Select</th></tr>');
+                    $('.thead-model').append('<tr><th width="14%">Praty Name</th><th width="11%">Plicy No.</th><th width="12%">Risk Date</th><th width="7%">Plan</th><th width="7%">Mode</th><th width="7%">ECS</th><th width="11%">Premium</th><th width="10%">Due Date</th><th width="13%">Mobile</th><th width="8%">Select</th></tr>');
+
                 } else if(reportID == 13) {
                     $('.thead-model').append('<tr><th width="13%">Praty Name</th><th width="11%">Birth Date(R)</th><th width="12%">Birth Date(A)</th><th width="12%">Wedding Date</th><th width="10%">Mobile</th><th width="8%">Select</th></tr>');
                 } else if(reportID == 14) {
@@ -712,9 +749,18 @@
                             $('.tbody-model').append('<tr><td width="12%">'+value.DONAME+'</td><td width="11%">'+value.DONAME+'</td><td width="12%">'+value.DONAME+'</td><td width="12%">'+value.DONAME+'</td><td width="10%">'+value.DONAME+'</td><td width="8%"><input type="checkbox" name="select['+value.PUNIQID+']" class="checkhour report-checkbox" checked="checked"></tr>');
                         });
                     } else if (reportID == 12) {
-                        $.each(data, function(key, value) {
+                        /*$.each(data, function(key, value) {
                             $('.tbody-model').append('<tr><td width="12%">'+value.DONAME+'</td><td width="11%">'+value.DONAME+'</td><td width="12%">'+value.DONAME+'</td><td width="12%">'+value.DONAME+'</td><td width="10%">'+value.DONAME+'</td><td width="8%"><input type="checkbox" name="select['+value.PUNIQID+']" class="checkhour report-checkbox" checked="checked"></tr>');
-                        });
+                        });*/
+
+                        $.each(data, function(key, value) {
+                        	let ECS_MODE = value.ECS_MODE=="Yes" ? "Yes" : "No";
+                            let RDT = value.RDT != null ? getDateFormateWise(value.RDT) : '';
+                            let FUPDATE = value.FUPDATE != null ? getDateFormateWise(value.FUPDATE) : '';
+                            let Pname = (value.Party != null && value.Party.NAME != null) ? value.Party.NAME : '';
+                            let mobile = (value.Party != null && value.Party.MOBILE != null) ? value.Party.MOBILE : '';
+                        	$('.tbody-model').append('<tr><td width="13%">'+Pname+'</td><td width="11%">'+value.PONO+'</td><td width="12%">'+RDT+'</td><td width="7%">'+value.PLAN+'</td><td width="7%">'+value.MODE+'</td><td width="7%">'+ECS_MODE+'</td><td width="11%">'+value.PREM+'</td><td width="10%">'+FUPDATE+'</td><td width="13%">'+mobile+'</td><td width="8%"><input type="checkbox" name="select['+value.PUNIQID+']" class="checkhour report-checkbox" checked="checked"></tr>');
+		                });
                     } else if (reportID == 13) {
                         $.each(data, function(key, value) {
                             $('.tbody-model').append('<tr><td width="12%">'+value.DONAME+'</td><td width="11%">'+value.DONAME+'</td><td width="12%">'+value.DONAME+'</td><td width="12%">'+value.DONAME+'</td><td width="10%">'+value.DONAME+'</td><td width="8%"><input type="checkbox" name="select['+value.PUNIQID+']" class="checkhour report-checkbox" checked="checked"></tr>');
@@ -759,7 +805,7 @@
 	function getDateFormateWise(getDate) {
 		//var date  = new Date(getDate);
 		var date  = getDate.split('-');
-		console.log(date);
+		//console.log(date);
         /*var yr    = date.getFullYear();
         var month = date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1);
         var day   = date.getDate()  < 10 ? '0' + date.getDate()  : date.getDate();*/
@@ -809,5 +855,62 @@
 			}
 		}
 	});
+
 	
+
+	/* Start  Due premium related JS*/
+	if(report_id==2) {
+		let select_options = ["Outstanding Due Premium"];
+		$("select[name='select_option'] option").each(function(){
+			if(!select_options.includes($(this).text())){
+				$(this).attr("hidden",true);
+			}
+		});
+		let select_radio = ["SSS?"];
+		$("input[name='redio_option[]']").each(function(){
+			if(!select_radio.includes($(this).val())){
+				$(this).parent().hide();
+			}
+		});
+		$("select[name='report_type']").val(10).attr("readonly",true); 
+		$("select[name='grouping_option']").attr("readonly",true); 
+		$("select[name='sorting_option']").val(0).attr("readonly",true); 
+	}
+	/* End  Due premium related JS*/
+
+	/* Start  Maturity Report JS*/
+	if(report_id==8) {
+		$("select[name='report_type']").val(0).attr("readonly",true); 
+		$("select[name='grouping_option']").attr("readonly",true); 
+		$("select[name='sorting_option']").val(0).attr("readonly",true); 
+	}
+	/* End  Maturity Report JS*/
+	
+	/* Start Lapse Report JS*/
+	if(report_id==5) {
+		$("select[name='report_type']").val(8).attr("readonly",true); 
+		$("select[name='grouping_option']").attr("readonly",true); 
+		$("select[name='sorting_option']").val(0).attr("readonly",true); 
+		let select_options = ["Lapse (Date)"];
+		$("select[name='select_option'] option").each(function(){
+			if(!select_options.includes($(this).text())){
+				$(this).attr("hidden",true);
+			}
+		});
+	}
+	/* End  Lapse Report JS*/
+	
+
+	/* Start Premium Calendar Report JS*/
+	if(report_id==12) {
+		let select_radio = ["ECS?"];
+		$("input[name='redio_option[]']").each(function(){
+			if(!select_radio.includes($(this).val())){
+				$(this).parent().hide();
+			}
+		});
+	}
+	/* End Premium Calendar Report JS*/
+	
+
 </script>

@@ -57,11 +57,12 @@
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-left: none;border-bottom: none;">Policy No.</th>
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Due Dt.</th>
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Premium</th>
-                <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Int.</th>
+                {{-- <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Int.</th> --}}
+                <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Mobile</th>
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Prem+Int.</th>
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Valid</th>
-                <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Br.</th>
-                <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-bottom: none;">ID</th>
+                {{-- <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-bottom: none;">Br.</th> --}}
+                {{-- <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-bottom: none;">ID</th> --}}
             </tr>
             <tr>
                 <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-right: none;border-top: none;"></th>
@@ -72,8 +73,8 @@
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-top: none;"></th>
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-top: none;"></th>
                 <th style="width:10%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-top: none;"></th>
-                <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-top: none;"></th>
-                <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-top: none;"></th>
+                {{-- <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-right: none;border-top: none;"></th> --}}
+                {{-- <th style="width:5%;padding-top: 0px;padding-bottom: 0px;border: 1px solid black;border-left: none;border-top: none;"></th> --}}
             </tr>
         </thead>
         <tbody>
@@ -106,11 +107,11 @@
                     <td style="border-left: none;border-right: none;border-bottom: none;width:13%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['PONO']) ? $value['PONO'] : 0 }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:12%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['FUPDATE']) ? \Carbon\Carbon::createFromFormat('Y-m-d', $value['FUPDATE'])->format('d/m/Y') : '' }}</td>
                     <td style="border-left : none;border-right: none;border-bottom: none;width:12%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['PREM']) ? $value['PREM']+0 : 0 }}</td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;">{{ 0 }}</td>
+                    <td style="border-left: none;border-right: none;border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;">{{ (!empty($value['Party']) && !empty($value['Party']->NAME)) ? $value['Party']->MOBILE : '' }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['PREM']) ? $value['PREM']+0 : 0 }}</td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['FUPDATE']) ? \Carbon\Carbon::createFromFormat('Y-m-d', $value['FUPDATE'])->format('d/m/Y') : '' }}</td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['Branch']) ? $value['Branch'] : '' }}</td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;"></td>
+                    {{-- <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;">{{ !empty($value['Branch']) ? $value['Branch'] : '' }}</td> --}}
+                    {{-- <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;"></td> --}}
                 </tr>
                 <tr>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:4%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td>
@@ -121,8 +122,8 @@
                     <td style="border-left: none;border-right: none;border-bottom: none;width:5%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td>
                     <td style="border-left: none;border-right: none;border-bottom: none;width:10%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td>
-                    <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td>
+                    {{-- <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td> --}}
+                    {{-- <td style="border-left: none;border-right: none;border-bottom: none;width:2%;padding-top: 0px;padding-bottom: 0px;border-top: none;"></td> --}}
                 </tr>
                 <?php $i++; ?>
             @endforeach

@@ -34,7 +34,7 @@ class ServicingReportsController extends Controller
         $reportsData  = $this->lib->_sendPostRequest("/reports/get-servicing-reports", $param);
         if(!empty($reportsData['data']) && count($reportsData['data']) > 0 && $reportsData['success'] == 1) {
             $time 			= strtotime("-1 year", time());
-            $fromDate 		= ($id == "9" || $id == "10") ? '01/'.date("m/Y") : date("d/m/Y", $time);
+            $fromDate 		= ($id == "9" || $id == "10") ? '01/'.date("m/Y") : ($id=="5" ? date("d/m/Y") : date("d/m/Y", $time));
             $toDate         = date('d/m/Y');
             $reports        = $reportsData['data'];
             $filter         = !empty($reports['filter']) ? json_decode($reports['filter']) : '';
@@ -56,7 +56,6 @@ class ServicingReportsController extends Controller
     }
 
     public function getReport(Request $request,$id) {
-
         $rData        = $request->all();
         $rData['id']  = $id;
         $data = '';
@@ -67,8 +66,6 @@ class ServicingReportsController extends Controller
             $reportsData  = $this->lib->_sendPostRequest("/reports/get-servicing-reports-setup", $param);
             $data         = !empty($reportsData['data']) ? $reportsData['data'] : '';
         }
-
-
 
         if(!empty($rData['select_do'])) {
             $rData['selectDo'] = explode(',', $rData['select_do']);
@@ -122,9 +119,7 @@ class ServicingReportsController extends Controller
             $rData['selectParty'] = explode(',', $rData['select_party']);
             unset($rData['select_party']);
         }
-
-        
-
+        info($rData);
         $idGet = [];
         if (!empty($rData['select'])) {
             foreach($rData['select'] as $key => $value) {
@@ -134,14 +129,12 @@ class ServicingReportsController extends Controller
         }
         $rData['idss'] = $idGet;
         $printReports = $this->lib->_sendPostRequest("/reports/get-print-reports-data", $rData);
-        $dData        = !empty($printReports['data']) ? $printReports['data'] : '';
-
-
+        $dData = !empty($printReports['data']) ? $printReports['data'] : '';
         $totalPrem = 0;
         if(!empty($dData)) {
             foreach($dData as $key => $value) {
                 if(!empty($value['NAME1'])) {
-                    $getPartyD = \DB::connection('lifecell_lic')->select("SELECT NAME,ABD,PHONE_O,PHONE_R,MOBILE FROM party where GCODE = {$value['NAME1']} limit 1");
+                    $getPartyD = \DB::connection('lifecell_lic')->select("SELECT NAME,ABD,PHONE_O,PHONE_R,MOBILE,AD1,AD2,AD3 FROM party where GCODE = {$value['NAME1']} limit 1");
                     if (!empty($getPartyD[0])) {
                         $dData[$key]['Party'] = $getPartyD[0];
                     }
@@ -164,19 +157,19 @@ class ServicingReportsController extends Controller
                 }
             }
         }
-        
         if(in_array($id, [8,7,3])) {
             $dData = $this->groupArray($dData, "AFILE", false, true);
         }
-
         $from_date    = $request['from_date'];
         $to_date      = $request['to_date'];
         $pdf = App::make('dompdf.wrapper');
+        $para = $request->all();
+        info($dData);
         if(!empty($dData)) {
             if($id == 1) {
                 $pdf = PDF::loadView('admin.servicing-reports.new_business',compact('data','dData','from_date','to_date'));
             } else if($id == 2) {
-                $pdf = PDF::loadView('admin.servicing-reports.premium_due_report',compact('data','dData','from_date','to_date','totalPrem'));
+                $pdf = PDF::loadView('admin.servicing-reports.premium_due_report',compact('data','dData','from_date','to_date','totalPrem','para'));
             } else if($id == 3) {
                 $pdf = PDF::loadView('admin.servicing-reports.fully_paid_policy_report',compact('data','dData','from_date','to_date'));
             } else if($id == 4) {
@@ -194,18 +187,104 @@ class ServicingReportsController extends Controller
             } else if($id == 10) {
                 $pdf = PDF::loadView('admin.servicing-reports.weddingday_report',compact('data','dData','from_date','to_date'));
             } else if($id == 12) {
-                $pdf = PDF::loadView('admin.servicing-reports.premium_cal_report',compact('data','dData','from_date','to_date'));
-            } else if($id == 13) {
+                $SA = 0;
+                $AD1 = '';
+                $AD2 = '';
+                $AD3 = '';
+                $PREM = 0;
+                $MOBILE = '';
+                $PHONE_R = '';
+                $PARTY_ABD = '';
+                $PARTY_NAME = '';
+                $policy_month = [];
+                $temp_policy_list = [];    
+                $to_date1 = \Carbon\Carbon::createFromFormat('d/m/Y',$to_date)->format('Y-m-d');
+                $from_date1 = \Carbon\Carbon::createFromFormat('d/m/Y',$from_date)->format('Y-m-d');
+                $mode_list = [
+                    "Yearly"=>"Y",
+                    "Half Yearly"=>"H",
+                    "Quarterly"=>"Q",
+                    "Monthly"=>"M",
+                    "SSS"=>"S"
+                ];
+                $mode_month_list = [
+                    "Yearly"=>12,
+                    "Half Yearly"=>6,
+                    "Quarterly"=>3,
+                    "Monthly"=>1,
+                    "SSS"=>1
+                ];
+                $date_list = [];
+                $interval = date_diff(date_create($from_date1),date_create($to_date1));
+                $total_month = $interval->format("%m") + 12*$interval->format("%y");
+                for($i=0;$i<=$total_month;$i++) { 
+                    $date_list[] = date("Y-m",strtotime("+".$i." month",strtotime($from_date1)));                    
+                }
+                $temp_policy_list = [];
+                $all_date = [];
+                foreach($dData as $key=>$val) {
+                    foreach($val as $value) {
+                    $temp_date = [];
+                        $mode  = $mode_list[$value["MODE"]] ?? '';
+                        $mode_month  = $mode_month_list[$value["MODE"]] ?? 0;
+                        $date = $value["RDT"]; 
+                        $last_date = $value["LASTPREM"];
+                        if($last_date > $from_date1) {
+                            while($to_date1 > $date ) {
+                                if(!in_array(date("Y-m",strtotime($date)),$all_date)) {
+                                    $all_date[] = date("Y-m",strtotime($date));
+                                }
+                                if(in_array(date("Y-m",strtotime($date)),$date_list)) {
+                                    $temp_date[] = date("Y-m",strtotime($date));
+                                }
+                                $date = date("Y-m-d", strtotime("+".$mode_month." month",strtotime($date)));
+                            }
+                        }
+                        $temp_policy_list[$key][] = [
+                            "family_name"=>@$value["family_name"],
+                            "MODE"=>$mode,
+                            "NAME"=>$value["NAME"],
+                            "MOBILE"=>$value["MOBILE"],
+                            "PHONE_R"=>$value["PHONE_R"],
+                            "SA"=>$value["SA"],
+                            "AD"=>$value["AD"],
+                            "AD2"=>$value["AD2"],
+                            "AD3"=>$value["AD3"],
+                            "ABD"=>$value["ABD"],
+                            "PREM"=>$value["PREM"],
+                            "RDT"=>$value["RDT"],
+                            "PREM"=>$value["PREM"],
+                            "LASTPREM"=>$last_date,
+                            "PONO"=>$value["PONO"],
+                            "temp_date"=>$temp_date,
+                            "MODE_MONTH"=>$mode_month,
+                            "PLAN_TERM"=>(($value['PLAN'] ?? 0).'/'.($value['TERM'] ?? 0).'/'.($value['MTERM'] ?? 0))
+                        ];
+                    }
+                }
+                
+                $pdf = PDF::loadView('admin.servicing-reports.premium_cal_report',compact('data','dData','from_date','to_date','rData','temp_policy_list','total_month','from_date1','all_date'));
+             } else if($id == 13) {
                 $pdf = PDF::loadView('admin.servicing-reports.cash_flow_report',compact('data','dData','from_date','to_date'));
             } else if($id == 14) {
                 $pdf = PDF::loadView('admin.servicing-reports.cash_in_out_report',compact('data','dData','from_date','to_date'));
             } else if($id == 15) {
                 $pdf = PDF::loadView('admin.servicing-reports.compreshensive_report',compact('data','dData','from_date','to_date'));
+            } else if($id == 24) {
+                $mode_list = [
+                    "Yearly"=>"Y",
+                    "Half Yearly"=>"H",
+                    "Quarterly"=>"Q",
+                    "Monthly"=>"M",
+                    "SSS"=>"S"
+                ];
+
+                
+                //return view('admin.servicing-reports.policy_list',compact('data','dData','rData','from_date','to_date','mode_list'));
+                $pdf = PDF::loadView('admin.servicing-reports.policy_list',compact('data','dData','from_date','to_date','mode_list','rData'));
             }
             return $pdf->stream();
         }
-        //$pdf = PDF::loadView('admin.servicing-reports.new_business');
-        //$pdf->loadHTML('<h1>Test</h1>');
         return "";
     }
 
